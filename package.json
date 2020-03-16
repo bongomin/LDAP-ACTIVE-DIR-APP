@@ -1,0 +1,23 @@
+{
+  "name": "authenticationapp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "4.15.x",
+    "cfenv": "1.0.x",
+    "body-parser": "*",
+    "ldapjs": "*"
+  },
+  "repository": {},
+  "engines": {
+    "node": "6.x"
+  },
+  "main": "app.js",
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

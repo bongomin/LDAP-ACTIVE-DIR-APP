@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Authentication Using LDAP AND AD</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<!--  Use the Angular library  -->
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-sanitize.js"></script>
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+		integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+		integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+		crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+		integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+		crossorigin="anonymous"></script>
+	<script type="text/javascript">
+		var LOGONAPP = angular.module("LOGONAPP", []);
+		var scope;
+		LOGONAPP.controller("myCtrl", function ($scope, $http) {
+			scope = $scope;  // Facilitate debugging
+
+			$scope.type = "LDAP";
+			$scope.ldap = {
+				serverUrl: "ldap://www.zflexldap.com",
+				username: "guest1",
+				suffix: "dc=zflexsoftware,dc=com",
+				password: "guest1password",
+				readerDN: "cn=ro_admin,ou=sysadmins,dc=zflexsoftware,dc=com",
+				readerPwd: "zflexpass"
+			};
+
+			$scope.ad = {
+				serverUrl: "",
+				username: "",
+				domain: "",
+				password: ""
+			};
+
+			$scope.getGroups = false;
+
+			$scope.response = "";
+
+
+			$scope.log = (str) => { console.log(str); };
+
+			$scope.logonLDAP = () => {
+				var url = $scope.getGroups ? "/ldapGrp" : "/ldap";
+				$scope.response = "Please wait";
+
+				$http.post(url, JSON.stringify($scope.ldap)).then(
+					(resp) => { $scope.response = resp.data; },
+					(resp) => { $scope.response = "Error: " + JSON.stringify(resp); }
+				);
+			};
+
+
+			$scope.logonAD = () => {
+				var url = $scope.getGroups ? "/adGrp" : "/ad";
+
+				$scope.response = "Please wait";
+				$http.post(url, JSON.stringify($scope.ldap)).then(
+					(resp) => { $scope.response = resp.data; },
+					(resp) => { $scope.response = "Error: " + JSON.stringify(resp); }
+				);
+			};
+
+		});
+
+	</script>
+
+</head>
+
+<body ng-app="LOGONAPP" ng-controller="myCtrl">
+	<div class="container">
+		<div class="alert alert-primary" role="alert">
+			LOGIN Using LDAP OR Active Directory
+		</div>
+		<div class="card">
+			<div class="card-header alert-primary">
+				Select Logon Type
+			</div>
+			<div class="card-body alert-secondary">
+				<input type="radio" ng-model="type" value="LDAP"> &nbsp LDAP &nbsp &nbsp &nbsp
+				<input type="radio" ng-model="type" value="AD"> &nbsp Active Directory &nbsp &nbsp
+				<input type="checkbox" ng-model="getGroups"> &nbsp Fetch Groups &nbsp &nbsp
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-md-7">
+				<!-- LDAP LOgin -->
+				<div class="card" ng-hide="type==='AD'">
+					<div class="card-header alert-primary">
+						Logon With LDAP
+					</div>
+					<div class="card-body">
+						<div class="form-group">
+							<label for="serverUrl">Server URL</label>
+							<input type="text" class="form-control" ng-model="ldap.serverUrl" ng-disabled="type==='AD'">
+
+						</div>
+						<div class="form-group">
+							<label for="serverUrl">LDAP Suffix</label>
+							<input type="text" class="form-control" ng-model="ldap.suffix" ng-disabled="type==='AD'">
+						</div>
+						<div class="form-group">
+							<label for="serverUrl">Username</label>
+							<input type="text" class="form-control" ng-model="ldap.username" ng-disabled="type==='AD'">
+						</div>
+						<div class="form-group">
+							<label for="serverUrl">Password</label>
+							<input type="password" ng-model="ldap.password" ng-disabled="type==='AD'" class="form-control">
+						</div>
+						<h6>Reader Account</h6>
+						<hr>
+						<div class="form-group">
+							<label for="serverUrl">Reader_DN</label>
+							<input type="text" ng-model="ldap.readerDN" ng-disabled="type==='AD'" class="form-control">
+						</div>
+
+						<div class="form-group">
+							<label for="serverUrl">Reader_Password</label>
+							<input type="password" ng-model="ldap.readerPwd" ng-disabled="type==='AD'" class="form-control">
+						</div>
+
+					</div>
+					<button type="button" class="btn btn-primary" ng-disabled="type==='AD'" ng-click="logonLDAP();">
+						Attempt to log on
+					</button>
+				</div>
+				<!-- Active Directory Login -->
+				<div class="card" type==='LDAP'"'" ng-hide="type==='LDAP'">
+					<div class="card-header alert-primary">
+						Logon With Active Directory
+					</div>
+					<div class="card-body">
+						<div class="form-group">
+							<label for="serverUrl">Server URL</label>
+							<input type="text" ng-model="ad.serverUrl" ng-disabled="type==='LDAP'" class="form-control">
+						</div>
+						<div class="form-group">
+							<label for="serverUrl">User name</label>
+							<input type="text" ng-model="ad.username" ng-disabled="type==='LDAP'" class="form-control">
+						</div>
+						<div class="form-group">
+							<label for="serverUrl">@ domain</label>
+							<input type="text" ng-model="ad.domain" ng-disabled="type==='LDAP'" class="form-control">
+						</div>
+						<div class="form-group">
+							<label for="serverUrl">Password</label>
+							<input Password class="form-control">
+						</div>
+						<button type="button" class="btn btn-primary" ng-disabled="type==='LDAP'" ng-click="logonAD();">
+							Attempt to log on
+						</button>
+
+
+					</div>
+				</div>
+
+			</div>
+			<div class="col-md-4">
+				<div class="card" style="height: 300px;">
+					<div class="card-header">
+						Response
+					</div>
+					<div class="card-body">
+						<pre>{{response}}</pre>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>
